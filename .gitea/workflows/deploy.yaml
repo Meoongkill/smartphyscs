@@ -1,0 +1,64 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get short commit hash
+        id: vars
+        run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> commit_hash.txt
+
+      - name: Get short commit hash
+        id: vars
+        run: echo $(git rev-parse --short HEAD) > commit_hash.txt
+
+      - name: Build Docker image
+        run: |
+          COMMIT_HASH=$(cat commit_hash.txt)
+          docker build -t git.humanbright.co.id/humanbright/spa-web:latest -t git.humanbright.co.id/humanbright/spa-web:$COMMIT_HASH .
+
+      - name: Test Docker image
+        run: |
+          COMMIT_HASH=$(cat commit_hash.txt)
+          docker run --rm git.humanbright.co.id/humanbright/spa-web:$COMMIT_HASH echo "Tests passed"
+
+      - name: Log in to Gitea Docker registry
+        run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login https://git.humanbright.co.id -u "${{ secrets.REGISTRY_USER }}" --password-stdin
+
+      - name: Push Docker image with tags
+        run: |
+          COMMIT_HASH=$(cat commit_hash.txt)
+          docker push git.humanbright.co.id/humanbright/spa-web:latest
+          docker push git.humanbright.co.id/humanbright/spa-web:$COMMIT_HASH
+
+      - name: Upload commit_hash.txt to server
+        uses: appleboy/scp-action@v0.0.3
+        with:
+          source: commit_hash.txt
+          target: /tmp/
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+
+      - name: Update GitOps config over SSH
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          script: |
+            cd /opt/kubefile
+            COMMIT_HASH=$(cat /tmp/commit_hash.txt)
+            ./bumpver.sh humanbright prod spa-web $COMMIT_HASH
+
+

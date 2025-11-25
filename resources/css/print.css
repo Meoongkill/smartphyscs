@@ -1,0 +1,96 @@
+/* Print Styles */
+@media print {
+    /* General print styles */
+    body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Hide non-printable elements */
+    .no-print,
+    button:not(.print-show),
+    nav,
+    .navigation {
+        display: none !important;
+    }
+
+    /* Page breaks */
+    .page-break {
+        page-break-before: always;
+    }
+
+    .avoid-break {
+        page-break-inside: avoid;
+    }
+
+    /* Tables */
+    table {
+        page-break-inside: auto;
+    }
+    
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    tfoot {
+        display: table-footer-group;
+    }
+
+    /* Ensure background colors and images print */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Ensure containers expand fully */
+    .scroll-container,
+    .overflow-auto,
+    .overflow-scroll {
+        overflow: visible !important;
+        height: auto !important;
+        max-height: none !important;
+    }
+
+    /* Page margins */
+    @page {
+        margin: 20mm;
+    }
+
+    /* Font sizes for print */
+    body {
+        font-size: 12pt;
+    }
+
+    h1 {
+        font-size: 18pt;
+    }
+
+    h2 {
+        font-size: 16pt;
+    }
+
+    h3 {
+        font-size: 14pt;
+    }
+
+    /* Links */
+    a {
+        text-decoration: none;
+    }
+
+    /* Force background colors to print */
+    .bg-purple-300,
+    .bg-indigo-100,
+    .bg-gray-50,
+    .bg-gray-100,
+    .bg-white {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+}
